@@ -1,17 +1,65 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <Header 
+      :numCorrect="numCorrect"
+      :numTotal="numTotal"
+    />
+    <b-container class="bv-example-row">
+      <b-row>
+        <b-col sm="6" offset="3">
+          <QuestionBox 
+            v-if="questions.length"
+            :currentQuestion="questions[index]"
+            :next="next"
+            :increment="increment"
+          />
+          <!-- Using v-bind ( shorthand : ) to pass variables to the QuestionBox child component -->
+        </b-col>
+      </b-row>
+    </b-container>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Header from './components/Header.vue'
+import QuestionBox from './components/QuestionBox.vue'
 
 export default {
   name: 'app',
   components: {
-    HelloWorld
+    Header,
+    QuestionBox
+  },
+  data() {
+    return {
+      questions: [],
+      index: 0,
+      numCorrect: 0,
+      numTotal: 0
+    }
+  },
+  methods: {
+    next() {
+      this.index++
+    },
+    increment(isCorrect) {
+      if(isCorrect){
+        this.numCorrect++
+      }
+      this.numTotal++
+    }
+  },
+  mounted: function() {
+    fetch('https://opentdb.com/api.php?amount=10&category=18&difficulty=easy&type=multiple', {
+      method: 'get'
+    })
+      //fetch returns a promise. ".then" waits for the promise to return data, which is the json from the api
+      .then((response) => {
+        return response.json()
+      })
+      .then((jsonData) => {
+        this.questions = jsonData.results
+      })
   }
 }
 </script>
